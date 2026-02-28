@@ -9,19 +9,18 @@ function Inventory() {
   const [form, setForm] = useState({
     name: "",
     category: "",
-    stock: "",
-    price: "",
-    expiry_date: ""
+    stock: 0,
+    price: 0,
+    expiry_date: "",
+    status: "Active"
   });
 
-  // Fetch Medicines
   const fetchMedicines = () => {
     fetch(`https://pharmacy-crm-hgur.onrender.com/medicines?search=${search}`)
       .then(res => res.json())
       .then(data => setMedicines(data));
   };
 
-  // Fetch Summary
   const fetchSummary = () => {
     fetch("https://pharmacy-crm-hgur.onrender.com/inventory/summary")
       .then(res => res.json())
@@ -33,29 +32,41 @@ function Inventory() {
     fetchSummary();
   }, [search]);
 
-  // Add OR Update Medicine
-  const handleSubmit = () => {
-    if (editingId) {
-      fetch(`https://pharmacy-crm-hgur.onrender.com/medicines/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      }).then(() => {
+  const handleSubmit = async () => {
+    const payload = {
+      ...form,
+      stock: Number(form.stock),
+      price: Number(form.price),
+      status: form.status || "Active"
+    };
+
+    try {
+      if (editingId) {
+        await fetch(
+          `https://pharmacy-crm-hgur.onrender.com/medicines/${editingId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }
+        );
         setEditingId(null);
-        resetForm();
-        fetchMedicines();
-        fetchSummary();
-      });
-    } else {
-      fetch("https://pharmacy-crm-hgur.onrender.com/medicines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      }).then(() => {
-        resetForm();
-        fetchMedicines();
-        fetchSummary();
-      });
+      } else {
+        await fetch(
+          "https://pharmacy-crm-hgur.onrender.com/medicines",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }
+        );
+      }
+
+      resetForm();
+      fetchMedicines();
+      fetchSummary();
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
@@ -63,19 +74,20 @@ function Inventory() {
     setForm({
       name: "",
       category: "",
-      stock: "",
-      price: "",
-      expiry_date: ""
+      stock: 0,
+      price: 0,
+      expiry_date: "",
+      status: "Active"
     });
   };
 
-  const deleteMedicine = (id) => {
-    fetch(`https://pharmacy-crm-hgur.onrender.com/medicines/${id}`, {
-      method: "DELETE"
-    }).then(() => {
-      fetchMedicines();
-      fetchSummary();
-    });
+  const deleteMedicine = async (id) => {
+    await fetch(
+      `https://pharmacy-crm-hgur.onrender.com/medicines/${id}`,
+      { method: "DELETE" }
+    );
+    fetchMedicines();
+    fetchSummary();
   };
 
   const startEdit = (med) => {
@@ -85,24 +97,23 @@ function Inventory() {
       category: med.category,
       stock: med.stock,
       price: med.price,
-      expiry_date: med.expiry_date
+      expiry_date: med.expiry_date,
+      status: med.status || "Active"
     });
   };
 
   const badgeStyle = (status) => {
-  if (status === "Active") return { background: "#2ecc71" };
-  if (status === "Available") return { background: "#3498db" };  // 🔵 Blue
-  if (status === "Low Stock") return { background: "#f39c12" };
-  if (status === "Expired") return { background: "#e74c3c" };
-  if (status === "Out of Stock") return { background: "#7f8c8d" };
-  return { background: "#95a5a6" };
-};
+    if (status === "Active") return { background: "#2ecc71" };
+    if (status === "Low Stock") return { background: "#f39c12" };
+    if (status === "Expired") return { background: "#e74c3c" };
+    if (status === "Out of Stock") return { background: "#7f8c8d" };
+    return { background: "#95a5a6" };
+  };
 
   return (
     <div style={{ padding: "30px", background: "#f5f6fa", minHeight: "100vh" }}>
       <h2>Inventory Management</h2>
 
-      {/* Summary Cards */}
       <div style={{ display: "flex", gap: "20px", marginBottom: "25px", flexWrap: "wrap" }}>
         <Card title="Total Items" value={summary.total_items} />
         <Card title="Active Items" value={summary.active_items} />
@@ -110,7 +121,6 @@ function Inventory() {
         <Card title="Total Value" value={`₹${summary.total_value || 0}`} />
       </div>
 
-      {/* Search */}
       <input
         type="text"
         placeholder="Search medicine..."
@@ -119,47 +129,56 @@ function Inventory() {
         style={{ marginBottom: "20px", padding: "8px", width: "300px" }}
       />
 
-      {/* Add / Edit Form */}
       <div style={{ marginBottom: "30px" }}>
         <h3>{editingId ? "Edit Medicine" : "Add Medicine"}</h3>
 
-        <input placeholder="Name"
+        <input
+          placeholder="Name"
           value={form.name}
           onChange={e => setForm({ ...form, name: e.target.value })}
         />
 
-        <input placeholder="Category"
+        <input
+          placeholder="Category"
           value={form.category}
           onChange={e => setForm({ ...form, category: e.target.value })}
         />
 
-        <input type="number" placeholder="Stock"
+        <input
+          type="number"
+          placeholder="Stock"
           value={form.stock}
-          onChange={e => setForm({ ...form, stock: parseInt(e.target.value) })}
+          onChange={e => setForm({ ...form, stock: e.target.value })}
         />
 
-        <input type="number" placeholder="Price"
+        <input
+          type="number"
+          placeholder="Price"
           value={form.price}
-          onChange={e => setForm({ ...form, price: parseFloat(e.target.value) })}
+          onChange={e => setForm({ ...form, price: e.target.value })}
         />
 
-        <input type="date"
+        <input
+          type="date"
           value={form.expiry_date}
           onChange={e => setForm({ ...form, expiry_date: e.target.value })}
         />
 
+        <select
+          value={form.status}
+          onChange={e => setForm({ ...form, status: e.target.value })}
+        >
+          <option value="Active">Active</option>
+          <option value="Low Stock">Low Stock</option>
+          <option value="Expired">Expired</option>
+          <option value="Out of Stock">Out of Stock</option>
+        </select>
+
         <button onClick={handleSubmit} style={{ marginLeft: "10px" }}>
           {editingId ? "Update" : "Add"}
         </button>
-
-        {editingId && (
-          <button onClick={() => { setEditingId(null); resetForm(); }} style={{ marginLeft: "10px" }}>
-            Cancel
-          </button>
-        )}
       </div>
 
-      {/* Table */}
       <table border="1" cellPadding="8" style={{ width: "100%" }}>
         <thead>
           <tr>

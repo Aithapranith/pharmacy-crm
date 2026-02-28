@@ -7,19 +7,19 @@ function Dashboard() {
   const [orders, setOrders] = useState({});
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/dashboard/summary")
+    fetch("https://pharmacy-crm-hgur.onrender.com/dashboard/summary")
       .then(res => res.json())
       .then(data => setSummary(data));
 
-    fetch("http://127.0.0.1:8000/dashboard/low-stock")
+    fetch("https://pharmacy-crm-hgur.onrender.com/dashboard/low-stock")
       .then(res => res.json())
       .then(data => setLowStock(data));
 
-    fetch("http://127.0.0.1:8000/dashboard/recent-sales")
+    fetch("https://pharmacy-crm-hgur.onrender.com/dashboard/recent-sales")
       .then(res => res.json())
       .then(data => setRecentSales(data));
 
-    fetch("http://127.0.0.1:8000/dashboard/purchase-orders")
+    fetch("https://pharmacy-crm-hgur.onrender.com/dashboard/purchase-orders")
       .then(res => res.json())
       .then(data => setOrders(data));
 

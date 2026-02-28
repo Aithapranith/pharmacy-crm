@@ -16,14 +16,14 @@ function Inventory() {
 
   // Fetch Medicines
   const fetchMedicines = () => {
-    fetch(`http://127.0.0.1:8000/medicines?search=${search}`)
+    fetch(`https://pharmacy-crm-hgur.onrender.com/medicines?search=${search}`)
       .then(res => res.json())
       .then(data => setMedicines(data));
   };
 
   // Fetch Summary
   const fetchSummary = () => {
-    fetch("http://127.0.0.1:8000/inventory/summary")
+    fetch("https://pharmacy-crm-hgur.onrender.com/inventory/summary")
       .then(res => res.json())
       .then(data => setSummary(data));
   };
@@ -36,7 +36,7 @@ function Inventory() {
   // Add OR Update Medicine
   const handleSubmit = () => {
     if (editingId) {
-      fetch(`http://127.0.0.1:8000/medicines/${editingId}`, {
+      fetch(`https://pharmacy-crm-hgur.onrender.com/medicines/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -47,7 +47,7 @@ function Inventory() {
         fetchSummary();
       });
     } else {
-      fetch("http://127.0.0.1:8000/medicines", {
+      fetch("https://pharmacy-crm-hgur.onrender.com/medicines", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -70,7 +70,7 @@ function Inventory() {
   };
 
   const deleteMedicine = (id) => {
-    fetch(`http://127.0.0.1:8000/medicines/${id}`, {
+    fetch(`https://pharmacy-crm-hgur.onrender.com/medicines/${id}`, {
       method: "DELETE"
     }).then(() => {
       fetchMedicines();
